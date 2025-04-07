@@ -1,0 +1,22 @@
+.schedule-wrapper {
+    background-color: #971985;
+    margin: 10px 20%;
+    padding: 5px 10px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.schedule-wrapper h1 {
+    color: #fff;
+    font-family: Arial, sans-serif;
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+/* Make the schedule-wrapper full width on mobile */
+@media (max-width: 768px) {
+    .schedule-wrapper {
+        margin: 10px 5px; /* Reduce side margins for smaller screens */
+        width: calc(100% - 10px); /* Ensure it spans nearly the full width */
+    }
+}
