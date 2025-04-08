@@ -16,7 +16,6 @@
 /* Make the schedule-wrapper full width on mobile */
 @media (max-width: 768px) {
     .schedule-wrapper {
-        margin: 10px 5px; /* Reduce side margins for smaller screens */
-        width: calc(100% - 10px); /* Ensure it spans nearly the full width */
+        margin: 10px 5px;
     }
 }

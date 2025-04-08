@@ -26,6 +26,11 @@ function FilterBtn({ filter, setFilter }) {
             }}>
                 下一小時
             </button>
+            <button className="btn filter-btn" onClick={() => {
+                setFilter({ ...filter, holiday: !filter.holiday });
+            }}>
+                {filter.holiday ? '平日' : '假日'}
+            </button>
         </div>
     )
 }

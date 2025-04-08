@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import './Schedule.css';
 
 
@@ -7,7 +8,39 @@ const STATION_NAMES = {
   'tymetro_a18': '桃園高鐵',
 };
 
-function Schedule({filter, schedule}) {
+function getSchedule(data, filter) {
+  const schedule = [];
+  data.forEach((item) => {
+    // Check direction
+    if (item.dir === filter.direction) {
+      return;
+    }
+    // Check holiday
+    if (item.holiday !== filter.holiday) {
+      return;
+    }
+
+    item.timeTable.forEach((time) => {
+      if (time.startTime < filter.startTime || time.startTime > filter.endTime) {
+        return;
+      }
+      schedule.push({
+        startTime: time.startTime,
+        startTimeStr: time.startTimeStr,
+        endTime: time.endTime,
+        endTimeStr: time.endTimeStr,
+        trainType: time.type
+      })
+    });
+  });
+  return schedule.sort((a, b) => a.startTime - b.startTime);
+}
+
+function Schedule({filter, rawData}) {
+  const [schedule, setSchedule] = useState([]);
+  useEffect(() => {
+    setSchedule(getSchedule(rawData, filter));
+  }, [filter, rawData]);
 
   return (
     <div className="schedule">
@@ -24,7 +57,7 @@ function Schedule({filter, schedule}) {
             <tr key={index}>
               <td>{item.startTimeStr}</td>
               <td>{item.endTimeStr}</td>
-              <td>{item.trainType === 'normal' ? '普' : '快'}</td>
+              <td>{item.trainType === 'normal' ? '普通' : '直達'}</td>
             </tr>
           ))}
         </tbody>

@@ -15,46 +15,22 @@ function toTimeString(timestamp) {
   return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
 }
 
-function getSchedule(data, filter) {
-  const schedule = [];
-  data.forEach((item) => {
-    if (item.dir !== filter.direction) {
-      return;
+function fetchData(setRawData, setError) {
+  fetch('tymc-schedule.json')
+  .then((response) => {
+    if (!response.ok) {
+      throw new Error('Failed to fetch schedule data');
     }
-    let needToAdd = false;
-    item.timeTable.forEach((time) => {
-      if (time.stationID === filter.startStation) {
-        if (time.depTime > filter.startTime && time.depTime < filter.endTime) {
-          needToAdd = true;
-        }
-      }
-    });
-    if (needToAdd) {
-      let startTimeStr = null,
-        startTime = null;
-      let endTimeStr = null,
-        endTime = null;
-      item.timeTable.forEach((time) => {
-        if (time.stationID === filter.startStation) {
-          startTime = time.depTime;
-          startTimeStr = time.depTimeStr;
-        } else if (time.stationID === filter.endStations[filter.direction]) {
-          endTime = time.arrTime;
-          endTimeStr = time.arrTimeStr;
-        }
-      });
-      if (startTimeStr && endTimeStr) {
-        schedule.push({
-          startTime: startTime,
-          startTimeStr: startTimeStr,
-          endTime: endTime,
-          endTimeStr: endTimeStr,
-          trainType: item.type,
-        });
-      }
-    }
+    return response.json();
+  })
+  .then((data) => {
+    setRawData(data);
+    setError(null);
+  })
+  .catch((error) => {
+    console.error('Error fetching schedule:', error);
+    setError('Failed to load schedule. Please try again later.');
   });
-  return schedule.sort((a, b) => a.startTime - b.startTime);
 }
 
 function ScheduleWrapper() {
@@ -63,28 +39,15 @@ function ScheduleWrapper() {
     endStations: ['tymetro_a01', 'tymetro_a18'],
     startTime: toTimestamp('09:00'),
     endTime: toTimestamp('10:00'),
-    direction: 0,
+    direction: 1,
+    holiday: true,
   });
-  const [schedule, setSchedule] = useState([]);
+  const [rawData, setRawData] = useState([]);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch('tymc.json')
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error('Failed to fetch schedule data');
-        }
-        return response.json();
-      })
-      .then((data) => {
-        setSchedule(getSchedule(data, filter));
-        setError(null);
-      })
-      .catch((error) => {
-        console.error('Error fetching schedule:', error);
-        setError('Failed to load schedule. Please try again later.');
-      });
-  }, [filter]);
+    fetchData(setRawData, setError);
+  }, []);
 
   return (
     <div className="schedule-wrapper">
@@ -93,7 +56,7 @@ function ScheduleWrapper() {
       {error ? (
         <p className="error">{error}</p>
       ) : (
-        <Schedule filter={filter} schedule={schedule} />
+        <Schedule filter={filter} rawData={rawData} />
       )}
     </div>
   );
